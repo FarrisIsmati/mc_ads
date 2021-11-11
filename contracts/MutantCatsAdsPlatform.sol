@@ -23,10 +23,46 @@ contract MutantCatsAdsPlatform {
         fish = IERC20(_fishAddress);
     }
 
-    function pay(uint amount, uint paymentId) external {
-        fish.transferFrom(msg.sender, sinkAddress, amount);
+    // requester sends fish
+    // fish gets added to contract
+    // contract is holding x fish that address sent into the contract
+    // contract updates how much fish of said user is being held
+
+    // TODO: AD tiers come into play based on amount and location
+    function requestAd(uint256 amount, uint256 paymentId) public {
+        // Pledge minimum is 10 Fish
+        require(amount >= 10, 'Minimum fish limit is 10');
+        uint256 requestorFishBalance = fish.balanceOf(msg.sender);
+        require(requestorFishBalance >= amount, 'You do not have enough Fish in your account');
+
+        // Receive Fish
+        fish.transferFrom(msg.sender, address(this), amount);
         emit PaymentDone(msg.sender, amount, paymentId, block.timestamp);
+
+        // If user not in hashmap add user and update balance
+        
+        // Else update user balance
     }
+
+    // // After an AD gets approved
+    // // Get address of user whos ad was approved
+    // // Remove fish from their balance in hashmap
+    // // Send fish to sink
+    // function sinkFish(address user, uint amount, uint paymentId) external {
+    //     // require(amount <= erc20balance, "Balance is ");
+    //     fish.transferFrom(msg.sender, sinkAddress, amount);
+    //     emit PaymentDone(msg.sender, amount, paymentId, block.timestamp);
+    // }
+
+    // // After an AD gets rejected
+    // // Get address of user whos rejected
+    // // Subtract amount of fish from users address in hashmap
+    // // Return x fish to users address who got rejected
+    // function returnFish(address user, uint amount) external {
+    //     // require(amount <= erc20balance, "Balance is ");
+    //     fish.transferFrom(msg.sender, sinkAddress, amount);
+    //     emit PaymentDone(msg.sender, amount, paymentId, block.timestamp);
+    // }
 }
 
 
