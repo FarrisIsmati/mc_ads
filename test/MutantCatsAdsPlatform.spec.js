@@ -1,5 +1,6 @@
 // DEPENDENCIES
 require('dotenv').config();
+const BigNumber = require('bignumber.js');
 const assert = require('assert');
 const Web3 = require('web3');
 
@@ -22,10 +23,20 @@ contract('MutantCatsAdsPlatform', accounts => {
             assert.strictEqual(recievedContractOwner, owner);
         });
 
-        it('sink account has fish', async () => {
-            const balance = await Fish.methods.balanceOf(sink).call();
-            console.log(balance);
-            // assert.strictEqual(balance, 1000);
+        it('sink account has 10000 fish', async () => {
+            const balanceBN = await this.fish.balanceOf(sink);
+
+            const sinkBalance = parseInt(BigNumber(balanceBN).toFixed(), 10)
+
+            assert.strictEqual(sinkBalance, 10000);
+        });
+
+        it('user account 1 has 10000 fish', async () => {
+            const balanceBN = await this.fish.balanceOf(account1);
+
+            const account1Balance = parseInt(BigNumber(balanceBN).toFixed(), 10)
+
+            assert.strictEqual(account1Balance, 10000);
         });
     });
 

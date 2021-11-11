@@ -22,9 +22,10 @@ module.exports = async function(deployer, network, ganacheAddresses) {
     await deployer.deploy(Fish);
     const fish = await Fish.deployed();
 
-    await fish.faucet(sinkAddress, web3.utils.toWei('10000'));
-    await fish.faucet(accountWithFish1, web3.utils.toWei('10000'));
-    await fish.faucet(accountWithFish2, web3.utils.toWei('10000'));
+    // .00000000000001 WEI is worth 10,000 fake fish in ganache effectively worthless
+    await fish.faucet(sinkAddress, web3.utils.toWei('.00000000000001'));
+    await fish.faucet(accountWithFish1, web3.utils.toWei('.00000000000001'));
+    await fish.faucet(accountWithFish2, web3.utils.toWei('.00000000000001'));
 
     fishAddress = fish.address;
   } else if (network === 'rinkeby' || network == 'rinkeby-fork') {
