@@ -88,3 +88,9 @@ contract MutantCatsAdsPlatform {
 
     //     emit TransferSent(msg.sender, to , amount);
     // }
+
+
+// Consider how ads will be formatted
+// Image, video, audio
+// Spots
+// Whats the most organic way to grow from a simple DS
