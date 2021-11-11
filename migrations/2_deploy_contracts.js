@@ -14,15 +14,24 @@ module.exports = async function(deployer, network, ganacheAddresses) {
 
   if (network === 'development') {
     // DEVELOPMENT
+    ownerAddress = add1; // Deployer of contract
+    sinkAddress = add2; // Send 1,000 Fish to sink address to test
+    const accountWithFish1 = add3; // Default ganache account 1 with fish for testing
+    const accountWithFish2 = add4; // Default ganache account 2 with fish for testing
+
     await deployer.deploy(Fish);
     const fish = await Fish.deployed();
-    await fish.faucet(payer, web3.utils.toWei('10000'));
 
-    ownerAddress = add1;
-    sinkAddress = add2;
-    fishAddress = fish.addresses;
+    await fish.faucet(sinkAddress, web3.utils.toWei('10000'));
+    await fish.faucet(accountWithFish1, web3.utils.toWei('10000'));
+    await fish.faucet(accountWithFish2, web3.utils.toWei('10000'));
+
+    fishAddress = fish.address;
   } else if (network === 'rinkeby' || network == 'rinkeby-fork') {
     // RINKEBY
+    ownerAddress = process.env['RINKEBY_OWNER'];
+    sinkAddress = process.env['SINK_ADDRESS_RINKEBY'];
+
     // If no Rinkeby address is provided redeploy FISH contract
     if (!process.env['FISH_ADDRESS_RINKEBY']) {
       await deployer.deploy(Fish);
@@ -32,9 +41,6 @@ module.exports = async function(deployer, network, ganacheAddresses) {
     } else {
       fishAddress = process.env['FISH_ADDRESS_RINKEBY'];
     }
-
-    ownerAddress = process.env['RINKEBY_OWNER'];
-    sinkAddress = process.env['SINK_ADDRESS_RINKEBY'];
   } else if (network === 'production') {
     // MAINNET
     ownerAddress = process.env['MAINNET_OWNER'];
@@ -43,7 +49,7 @@ module.exports = async function(deployer, network, ganacheAddresses) {
   }
 
   // Deploy contract to network
-  await deployer.deploy(MutantCatsAdsPlatform, {gas: 5000000, from: ownerAddress});
+  await deployer.deploy(MutantCatsAdsPlatform, sinkAddress, fishAddress, {gas: 5000000, from: ownerAddress});
   await MutantCatsAdsPlatform.deployed();
   
   console.log('Deployed Contract!');
