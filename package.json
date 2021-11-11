@@ -1,0 +1,35 @@
+{
+  "name": "mc_ads",
+  "version": "1.0.0",
+  "description": "Blockchain contract to display simple ads via fish",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test",
+    "update-abi": "NETWORK=rinkeby truffle compile && truffle deploy",
+    "compile": "truffle compile",
+    "deploy-rinkeby": "truffle deploy --network rinkeby"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FarrisIsmati/mc_ads.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FarrisIsmati/mc_ads/issues"
+  },
+  "homepage": "https://github.com/FarrisIsmati/mc_ads#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.2",
+    "@truffle/hdwallet-provider": "^1.6.0",
+    "dotenv": "^10.0.0",
+    "mocha": "^9.1.3",
+    "solc": "^0.8.10",
+    "truffle-hdwallet-provider": "^1.0.17",
+    "web3": "^1.6.0",
+    "web3-eth-contract": "^1.6.0"
+  }
+}
