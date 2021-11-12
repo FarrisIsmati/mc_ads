@@ -2,7 +2,7 @@
 require('dotenv').config();
 
 // CONTRACTS
-const MutantCatsAdsPlatform = artifacts.require('MutantCatsAdsPlatform');
+const MutantCatsSpotlightPlatform = artifacts.require('MutantCatsSpotlightPlatform');
 const Fish = artifacts.require('Fish');
 
 module.exports = async function(deployer, network, ganacheAddresses) {
@@ -11,9 +11,11 @@ module.exports = async function(deployer, network, ganacheAddresses) {
   let ownerAddress = '';
   let sinkAddress = '';
   let fishAddress = '';
+  let maxLeaderboard = 100;
 
   if (network === 'development') {
     // DEVELOPMENT
+    maxLeaderboard = 12;
     ownerAddress = add1; // Deployer of contract
     sinkAddress = add2; // Send 1,000 Fish to sink address to test
     const accountWithFish1 = add3; // Default ganache account 1 with fish for testing
@@ -50,8 +52,8 @@ module.exports = async function(deployer, network, ganacheAddresses) {
   }
 
   // Deploy contract to network
-  await deployer.deploy(MutantCatsAdsPlatform, sinkAddress, fishAddress, {gas: 5000000, from: ownerAddress});
-  await MutantCatsAdsPlatform.deployed();
+  await deployer.deploy(MutantCatsSpotlightPlatform, sinkAddress, fishAddress, maxLeaderboard, {gas: 5000000, from: ownerAddress});
+  await MutantCatsSpotlightPlatform.deployed();
   
   console.log('Deployed Contract!');
 };
