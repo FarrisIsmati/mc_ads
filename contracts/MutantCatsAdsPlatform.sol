@@ -10,6 +10,17 @@ contract MutantCatsAdsPlatform {
     address public sinkAddress;
     IERC20 public fish;
 
+    // Basic Ad
+    struct adBasic {
+        uint256 startTime;
+        uint256 endTime;
+        string ipfsUrl;
+    }
+    // All basic ads that are currently active
+    mapping(string => string[]) adBasicActive; 
+    // All basic ads active/inactive in their current location (if inactive and value exists means it hasn't been replaced)
+    mapping(string => mapping(string => mapping(string => mapping(string => adBasic)))) adBasicMap;
+
     event PaymentDone(
         address payer,
         uint amount,
@@ -21,6 +32,43 @@ contract MutantCatsAdsPlatform {
         owner = msg.sender;
         sinkAddress = _sinkAddress;
         fish = IERC20(_fishAddress);
+
+        // Defining initial Ad Basic Structure
+        // TODO define Ad Wall data structure
+        // Ads
+        adBasicMap['MUTANTCATS.IO']['AD']['VERTICAL']['AD1V']; // TODO make equal to adBasic contract
+        adBasicMap['MUTANTCATS.IO']['AD']['HORIZONTAL']['AD1H'];
+        adBasicMap['MUTANTCATS.IO']['AD']['SQUARE']['AD1S'];
+        // Spotlight
+        adBasicMap['MUTANTCATS.IO']['SPOTLIGHT']['VERTICAL']['SP1V'];
+        adBasicMap['MUTANTCATS.IO']['SPOTLIGHT']['HORIZONTAL']['SP1H'];
+        adBasicMap['MUTANTCATS.IO']['SPOTLIGHT']['SQUARE']['SP1S'];
+    }
+
+    // Getting Ad/Spotlight data
+    function getAd(string memory adLocation, string memory adType, string memory orientation, string memory adId) public view returns(adBasic memory) {
+        return adBasicMap[adLocation][adType][orientation][adId];
+    }
+
+    // Creates new Ad/Spotlight data
+    function setAd(
+        string memory adLocation, 
+        string memory adType, 
+        string memory orientation, 
+        string memory adId, 
+        uint256 startTime, 
+        uint256 endTime,
+        string ipfsUrl
+        ) public returns(bool success) {
+        // Get ad in this position
+        // If none exists start time will be set now
+        // If one exists start time will start after last queued one is in position
+
+        // SPEND TIME THINKING ABOUT HOW ADS SHOULD BE SERVED
+        // THIS REALLY DICTATES HOW THINGS WORK
+        // QUEUING, SPOT PICKING, ETC
+        adBasicMap[adLocation][adType][orientation][adId].startTime = startTime; // Make sure function tah
+        return true;
     }
 
     // requester sends fish
@@ -94,3 +142,11 @@ contract MutantCatsAdsPlatform {
 // Image, video, audio
 // Spots
 // Whats the most organic way to grow from a simple DS
+
+// Types of Ads
+// Purposefully Placed Banners
+// Location (website,sandbox)
+// * Id tied with a location
+// Spotlight Banner
+// * Id tied with spotlight 
+// Ad Wall
