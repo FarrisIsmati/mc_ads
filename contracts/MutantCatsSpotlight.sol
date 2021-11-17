@@ -12,25 +12,29 @@ contract MutantCatsSpotlightPlatform {
 
     // Stats
     // Data for tracking bids and addresses
-    uint256 public maxLeaderboard; // Max amount of people that can win a spotlight spot for the week
-    uint256 public totalBids = 0; // Total number of bids per wallet per week
-    uint256 public minBid = 10; // Lowest amount of fish someone can bid
-    uint256 public bidId = 0;
+    uint256 public maxSpotlightSpots = 100; // Max amount of people that can hold a spotlight spot
+    uint256 public spotIndex = 0; // Current index of the spotlight purchase
 
-    // Winner information for the week
+    // Winner information for the day
     mapping(address => uint256) winnerMap; // Identifies an address and their place
-    uint256[] winnerArr; // Array of
-
-    // Sorting of top X bids handled in front end (TODO Balanced BST, or possibly too much gas to manage on contract)
-    struct Bid {
+    struct Spot {
+        address userAddress;
+        string imgUrl;
+        string blurb;
         uint256 amount;
-        uint256 bidTime;
+        uint256 purchaseTime;
     }
-    mapping(address => Bid) userBidMap; 
+    Spot[maxSpotlightSpots] spotlightSpots = new Spot[maxSpotlightSpots]; // Array of spots to that will hold spotlight
+
+    // Raffel
+    // Winner selected offchain
+    uint256 raffelIndex = 0;
+    address[200][] raffelArray;
 
     // TODO
-    // Delisted users map, not allowed to bid
-    // Admin map, perform admin functions like approval and refreshing fish, removing active spotlight
+    // * Delisted users list, not allowed to bid
+    // * Admin user list, admins can delist user addresses and manually override innaporpiate spotlights
+    // * Admin update spotlights
 
     // Events
     event PaymentDone(
@@ -40,87 +44,102 @@ contract MutantCatsSpotlightPlatform {
         uint256 date
     );
 
-    constructor(address _sinkAddress, address _fishAddress, uint256 _maxLeaderboard) {
+    constructor(address _sinkAddress, address _fishAddress) {
         owner = msg.sender;
         sinkAddress = _sinkAddress;
         fish = IERC20(_fishAddress);
-        maxLeaderboard = _maxLeaderboard;
     }
 
-    function bid(uint256 amount) public {
+    // MODIFY function
+    function getSpot(uint256 amount, string imgUrl, string blurb) public {
+        // Ensure user has enough fish 
         uint256 requestorFishBalance = fish.balanceOf(msg.sender);
         require(requestorFishBalance >= amount, 'You do not have enough Fish in your account');
 
-        // Minimum amount of fish to bid will be 10 if there are less than the max amount of winning bids placed
-        require(amount >= minBid, 'Minimum fish limit is 10');
-
-        // If a user has already placed a prior bid
-        // Only take the difference of additional fish from their balance and add it to their bid
-        if (userBidMap[msg.sender].amount > 0) {
-            // Else users bid must be greater than previous bid
-            require(userBidMap[msg.sender].amount < amount, 'Your bid must be higher than your previous bid');
-            amount = amount - userBidMap[msg.sender].amount;
-        } else {
-            // Update stats of contract bid if it's a new bid
-            bidId += 1;
-            totalBids += 1;
+        if (spotIndex >= 0 && spotIndex <= 9) {
+            // Positions 0 - 9 cost 50 fish
+            require(amount == 50, 'You must pay 50 fish');
+        } else if (spotIndex >= 10 && spotIndex <= 19) {
+            // Positions 10 - 19 cost 40 fish
+            require(amount == 40, 'You must pay 40 fish');
+        } else if (spotIndex >= 20 && spotIndex <= 29) {
+            // Positions 20 - 29 cost 30 fish
+            require(amount == 30, 'You must pay 30 fish');
+        } else if (spotIndex >= 30 && spotIndex <= 39) {
+            // Positions 30 - 39 cost 20 fish
+            require(amount == 20, 'You must pay 20 fish');
+        } else if (spotIndex >= 40 && spotIndex <= 99) {
+            // Positions 40 - 99 cost 10 fish
+            require(amount == 10, 'You must pay 10 fish');
         }
+
+        // Check if spotlight spot time has expired
+        require(checkPositionAvailable(spotIndex), 'Position time has not yet expired');
+
+        // TODO
+        // Only keep X% of profits for raffel
+        // Rest gets garbage dumped
 
         // Receive Fish
         fish.transferFrom(msg.sender, address(this), amount);
         emit PaymentDone(msg.sender, amount, bidId, block.timestamp);
 
-        // Update bid tracker
-        Bid memory userBid = Bid(amount, block.timestamp);
+        // Add user to spotlight
+        Spot memory userSpot = Spot(msg.sender, imgUrl, blurb, amount, block.timestamp);
+        spotlightSpots[spotIndex] = userSpot;
 
-        if (userBidMap[msg.sender].amount == 0) {
-            // If user not in hashmap add user and update balance
-            userBidMap[msg.sender] = userBid;
-        } else {
-            // If a user is updating a prior bid (increasing only)
-            userBidMap[msg.sender].amount = userBidMap[msg.sender].amount + amount;
-            userBidMap[msg.sender].bidTime = block.timestamp;
+        // Reset spotlight once array maxed out
+        if (spotIndex == 99) {
+            spotIndex = 0;
+            storeRaffelArray();
+            // After all Spots in rotation have been bought create an array of all potential winners and store them
         }
     }
 
-    function getBid(address userAddress) public view returns(Bid memory) {
-        return userBidMap[userAddress];
+    // Check if position available (min 1 day apart)
+    function checkPositionAvailable(uint256 index) public returns(bool) {
+        Spot spot = spotlightSpots[index];
+        return block.timestamp - spot.purchaseTime > 86400;
     }
 
-    function sort(uint256[] memory data) public returns(uint256[] memory) {
-       quickSort(data, int(0), int(data.length - 1));
-       return data;
+    // Returns a spotlight spot given an index
+    function getSpotlight(uint256 index) public view returns(Spot memory) {
+        return spotlightSpots[index];
     }
-    
-    function quickSort(uint[] memory arr, int left, int right) internal{
-        int i = left;
-        int j = right;
-        if(i==j) return;
-        uint pivot = arr[uint(left + (right - left) / 2)];
-        while (i <= j) {
-            while (arr[uint(i)] < pivot) i++;
-            while (pivot < arr[uint(j)]) j--;
-            if (i <= j) {
-                (arr[uint(i)], arr[uint(j)]) = (arr[uint(j)], arr[uint(i)]);
-                i++;
-                j--;
+
+    // Store raffel array
+    function storeRaffelArray() private {
+        uint256 spotlightArrIndex = 0;
+        address[200] spotlightAddressArr= new address[200];
+        for(uint256 i = 0; i < maxSpotlightSpots; i += 1) {
+            Spot spot = spotlightSpots[i];
+            for(uint256 j = 0; j < spot.amount/10; j += 1) {
+                spotlightAddressArr[spotlightArrIndex] = spot.userAddress;
+                spotlightArrIndex += 1;
             }
         }
-        if (left < j)
-            quickSort(arr, left, j);
-        if (i < right)
-            quickSort(arr, i, right);
+
+        // Update raffel array
+        raffelArray[raffelIndex] = spotlightAddressArr;
+        raffelIndex += 1;
     }
 
-    // Work on return array in solidity
-    // Worst case work on sorting array in solidity, calling array with pos in web3
-    // function finalizeWinners() public returns(uint256[] memory) {
-    //     uint256[] memory arr1;
-    //     arr1[0] = 10;
-    //     arr1[1] = 5;
-    //     arr1[2] = 1;
-    //     arr1[3] = 8;
-    //     return arr1;
-    //     // return sort(arr1);
-    // }
+    // Get raffel array
+    // Select winner off chain
+    function getRaffelGroup(uint256 index) public view returns(address[] memory) {
+        return raffelArray[index];
+    }
+
+    function sendFundsToWinners(address winner1, address winner2, address winner3) {
+        // TODO
+        // SEND FISH TO WINNERS
+        // Winner 1 gets 75%
+        // Winner 2 gets 15%
+        // Winner 3 gets 10%
+        // Receive Fish
+        fish.transfer(address(winner1), amount);
+        fish.transfer(address(winner2), amount);
+        fish.transfer(address(winner3), amount);
+        // emit PaymentDone(winner1, amount, bidId, block.timestamp);
+    }
 }
