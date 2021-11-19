@@ -18,49 +18,49 @@ contract('MutantCatsSpotlightPlatform', accounts => {
         this.fish = await Fish.deployed();
     });
 
-    // describe('Checking initial Ganache deployment is successful', () => {
-    //     it('is owner the owner', async () => {
-    //         const recievedContractOwner = await this.mcSpotlightPlatform.owner();
-    //         assert.strictEqual(recievedContractOwner, owner);
-    //     });
+    describe('Checking initial Ganache deployment is successful', () => {
+        it('is owner the owner', async () => {
+            const recievedContractOwner = await this.mcSpotlightPlatform.owner();
+            assert.strictEqual(recievedContractOwner, owner);
+        });
 
-    //     it('sink account has 10000 fish', async () => {
-    //         const balanceBN = await this.fish.balanceOf(sink);
+        it('sink account has 10000 fish', async () => {
+            const balanceBN = await this.fish.balanceOf(sink);
 
-    //         const sinkBalance = parseInt(BigNumber(balanceBN).toFixed(), 10);
+            const sinkBalance = parseInt(BigNumber(balanceBN).toFixed(), 10);
 
-    //         assert.strictEqual(sinkBalance, 10000);
-    //     });
+            assert.strictEqual(sinkBalance, 10000);
+        });
 
-    //     it('user account 1 has 10000 fish', async () => {
-    //         const balanceBN = await this.fish.balanceOf(account1);
+        it('user account 1 has 10000 fish', async () => {
+            const balanceBN = await this.fish.balanceOf(account1);
 
-    //         const account1Balance = parseInt(BigNumber(balanceBN).toFixed(), 10);
+            const account1Balance = parseInt(BigNumber(balanceBN).toFixed(), 10);
 
-    //         assert.strictEqual(account1Balance, 10000);
-    //     });
+            assert.strictEqual(account1Balance, 10000);
+        });
 
-    //     it('maxLeaderboard is set to 12', async () => {
-    //         const maxLeaderboardBN = await this.mcSpotlightPlatform.maxLeaderboard.call();
-    //         const maxLeaderboard = parseInt(BigNumber(maxLeaderboardBN).toFixed(), 10);
+        it('maxSpotlightSpots is set to 100', async () => {
+            const maxSpotlightSpotsBN = await this.mcSpotlightPlatform.maxSpotlightSpots.call();
+            const maxSpotlightSpots = parseInt(BigNumber(maxSpotlightSpotsBN).toFixed(), 10);
 
-    //         assert.strictEqual(maxLeaderboard, 12);
-    //     });
+            assert.strictEqual(maxSpotlightSpots, 100);
+        });
 
-    //     it('totalBids is set to 0', async () => {
-    //         const totalBidsBN = await this.mcSpotlightPlatform.totalBids.call();
-    //         const totalBids = parseInt(BigNumber(totalBidsBN).toFixed(), 10);
+        // it('totalBids is set to 0', async () => {
+        //     const totalBidsBN = await this.mcSpotlightPlatform.totalBids.call();
+        //     const totalBids = parseInt(BigNumber(totalBidsBN).toFixed(), 10);
 
-    //         assert.strictEqual(totalBids, 0);
-    //     });
+        //     assert.strictEqual(totalBids, 0);
+        // });
 
-    //     it('minBid is set to 10', async () => {
-    //         const minBidBN = await this.mcSpotlightPlatform.minBid.call();
-    //         const minBid = parseInt(BigNumber(minBidBN).toFixed(), 10);
+        // it('minBid is set to 10', async () => {
+        //     const minBidBN = await this.mcSpotlightPlatform.minBid.call();
+        //     const minBid = parseInt(BigNumber(minBidBN).toFixed(), 10);
 
-    //         assert.strictEqual(minBid, 10);
-    //     });
-    // });
+        //     assert.strictEqual(minBid, 10);
+        // });
+    });
 
     // describe('Fish contract bid function', async () => {
     //     // Account 1
@@ -306,11 +306,4 @@ contract('MutantCatsSpotlightPlatform', accounts => {
     //         assert.strictEqual(bidTimeUpdated, bidTimeOld);
     //     });
     // })
-
-    describe('Finalize winners', async () => {
-        it('testing sorting', async () => {
-            const result = await this.mcSpotlightPlatform.finalizeWinners();
-            console.log(result);
-        });
-    });
 });
